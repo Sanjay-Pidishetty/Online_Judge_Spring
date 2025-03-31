@@ -16,8 +16,6 @@ public class CodeController {
 
     @Autowired
     private CodeExecutionService codeExecutionService;
-    @Autowired
-    private UserService userService;
 
     @PostMapping("/execute")
     public ResponseEntity<String> executeCode(@RequestBody Map<String, Object> requestBody) {
@@ -36,23 +34,4 @@ public class CodeController {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
-    
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody User user) {
-        try {
-            // Assume the UserService handles the registration logic
-            boolean isRegistered = userService.registerUser(user);
-
-            if (isRegistered) {
-                return ResponseEntity.ok("Registration successful.");
-            } else {
-                return ResponseEntity.status(400).body("Registration failed. Please try again.");
-            }
-        } catch (Exception e) {
-            // Handle any errors that occur during registration
-            return ResponseEntity.status(500).body("Error: " + e.getMessage());
-        }
-    }
-    
-    
 }
