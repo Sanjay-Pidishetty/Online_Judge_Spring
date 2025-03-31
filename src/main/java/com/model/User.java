@@ -3,22 +3,24 @@ package com.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import jakarta.validation.constraints.NotNull;
-
 @Document(collection = "users")
 public class User {
 	@Id
 	private String id;
 	
-	@NotNull
 	private String userName;
 	
-	@NotNull
 	private String email;
 	
 	private String password;
 	
 	private int solvedProblems;
+	
+	public User(String usereName, String email, String password) {
+		this.userName = userName;
+		this.email = email;
+		this.password = password;
+	}
 
 	public String getId() {
 		return id;
@@ -51,4 +53,13 @@ public class User {
 	public void setSolvedProblems(int solvedProblems) {
 		this.solvedProblems = solvedProblems;
 	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
 }
