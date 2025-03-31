@@ -2,11 +2,18 @@ package com.service;
 
 import org.springframework.stereotype.Service;
 import java.io.*;
+import java.nio.file.*;
 
 @Service
 public class CodeExecutionService {
+	
+	private final String targetDir = "code_output"; 
 
     public String executeCode(String language, String code) throws Exception {
+    	Path directoryPath = Paths.get(targetDir);
+        if (!Files.exists(directoryPath)) {
+            Files.createDirectories(directoryPath);  // Create the directory if it doesn't exist
+        }
         if (language.equalsIgnoreCase("java")) {
             return executeJavaCode(code);
         } else if (language.equalsIgnoreCase("cpp")) {
@@ -16,13 +23,13 @@ public class CodeExecutionService {
     }
 
     private String executeJavaCode(String code) throws IOException {
-        File file = new File("Solution.java");
+        File file = new File(targetDir +"/Solution.java");
         BufferedWriter writer = new BufferedWriter(new FileWriter(file));
         writer.write(code);
         writer.close();
 
         // Compile Java code
-        Process compileProcess = new ProcessBuilder("javac", "Solution.java").start();
+        Process compileProcess = new ProcessBuilder("javac", targetDir + "/Solution.java").start();
         try {
             compileProcess.waitFor();
         } catch (InterruptedException e) {
@@ -34,18 +41,18 @@ public class CodeExecutionService {
         }
 
         // Execute Java code
-        Process executeProcess = new ProcessBuilder("java", "Solution").start();
+        Process executeProcess = new ProcessBuilder("java", "-cp", targetDir, "Solution").start();
         return getOutput(executeProcess);
     }
 
     private String executeCppCode(String code) throws IOException {
-        File file = new File("Solution.cpp");
+        File file = new File(targetDir + "/Solution.cpp");
         BufferedWriter writer = new BufferedWriter(new FileWriter(file));
         writer.write(code);
         writer.close();
 
         // Compile C++ code
-        Process compileProcess = new ProcessBuilder("g++", "Solution.cpp", "-o", "Solution").start();
+        Process compileProcess = new ProcessBuilder("g++", targetDir + "/Solution.cpp", "-o", targetDir + "/Solution").start();
         try {
             compileProcess.waitFor();
         } catch (InterruptedException e) {
@@ -57,7 +64,7 @@ public class CodeExecutionService {
         }
 
         // Execute C++ code
-        Process executeProcess = new ProcessBuilder("./Solution").start();
+        Process executeProcess = new ProcessBuilder(targetDir + "/Solution").start();
         return getOutput(executeProcess);
     }
 
