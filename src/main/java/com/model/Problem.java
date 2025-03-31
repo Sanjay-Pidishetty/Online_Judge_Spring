@@ -6,20 +6,27 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "problems")
 public class Problem {
 	@Id
-	private String id;
-		
+	private String id;	
 	private String title;
-	
 	private String description;
-
 	private String language;
-	
 	private String input;
 	private String output;
 	private String difficulty;
 	private String constraints;
 	private int timeLimit;
-	
+	public Problem(String title, String description, String language, String input, String output, String difficulty,
+			String constraints,int timeLimit) {
+		super();
+		this.title = title;
+		this.description = description;
+		this.language = language;
+		this.input = input;
+		this.output = output;
+		this.difficulty = difficulty;
+		this.constraints = constraints;
+		this.timeLimit = timeLimit;
+	}
 	public String getId() {
 		return id;
 	}
@@ -74,4 +81,6 @@ public class Problem {
 	public void setTimeLimit(int timeLimit) {
 		this.timeLimit = timeLimit;
 	}
+	
+	
 }

@@ -33,3 +33,5 @@ build/
 .vscode/
 
 code_output
+.metadata
+.mvn/
