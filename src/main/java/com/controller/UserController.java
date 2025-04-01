@@ -1,6 +1,7 @@
 package com.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +12,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.model.User;
 import com.service.UserService;
 
+@RestController
 @RequestMapping("/user")
 public class UserController {
 	
@@ -37,6 +40,19 @@ public class UserController {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
+	
+	@PostMapping("/login")
+	public String login(@RequestBody Map<String, String> request){
+		String userName = request.get("username");
+		String password = request.get("password");
+		
+		if(userName == null || password == null) {
+			return "Invalid input";
+		}
+		
+		boolean authenticated = userService.authenticateUser(userName, password);
+        return authenticated ? "Login successful" : "Invalid username or password";
+	}
 	
 	@GetMapping("/getAll")
 	public List<User> getAllUsers(){

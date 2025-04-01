@@ -15,10 +15,13 @@ public class Problem {
 	private String difficulty;
 	private String constraints;
 	private int timeLimit;
+	
+	public Problem() {
+		
+	}
 
 	public Problem(String title, String description, String language, String input, String output, String difficulty,
 			String constraints, int timeLimit) {
-		super();
 		this.title = title;
 		this.description = description;
 		this.language = language;
