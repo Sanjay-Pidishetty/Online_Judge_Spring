@@ -17,8 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.model.Problem;
 import com.service.ProblemService;
 
+import io.swagger.annotations.Api;
+
 @RestController
 @RequestMapping("/problem")
+@Api(tags = "Problem Management", description = "Operations related to Problems")
 public class ProblemController {
 	@Autowired
 	private ProblemService problemService;

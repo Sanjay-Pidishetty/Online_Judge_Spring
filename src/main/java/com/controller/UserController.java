@@ -17,8 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.model.User;
 import com.service.UserService;
 
+import io.swagger.annotations.Api;
+
 @RestController
 @RequestMapping("/user")
+@Api(tags = "User Management", description = "Operations related to Users")
 public class UserController {
 	
 	@Autowired

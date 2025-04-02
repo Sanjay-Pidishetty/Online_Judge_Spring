@@ -31,6 +31,7 @@ public class SecurityConfig{
 	        )
 				.authorizeHttpRequests()
 						.requestMatchers(new AntPathRequestMatcher("/user/register")).permitAll()
+						.requestMatchers(new AntPathRequestMatcher("/swagger-ui.*")).permitAll()
 						.requestMatchers(new AntPathRequestMatcher("/user/login")).permitAll()
 									.requestMatchers(new AntPathRequestMatcher("/api/**")).hasAnyRole("Admin", "User")
 									.requestMatchers(new AntPathRequestMatcher("/problem/**")).hasAnyRole("Admin", "User")
