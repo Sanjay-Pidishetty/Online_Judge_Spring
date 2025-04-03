@@ -13,13 +13,25 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import com.security.JwtAuthenticationFilter;
+import com.security.JwtUtil;
+
 @Configuration
 public class SecurityConfig{
+	
+	private UserDetailsService userDetailsService;
+	
+	@Autowired
+	private JwtAuthenticationFilter jwtAuthenticationFilter;
+	
+	@Autowired
+    private JwtUtil jwtUtil;
 	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -33,11 +45,9 @@ public class SecurityConfig{
 						.requestMatchers(new AntPathRequestMatcher("/user/register")).permitAll()
 						.requestMatchers(new AntPathRequestMatcher("/swagger-ui.*")).permitAll()
 						.requestMatchers(new AntPathRequestMatcher("/user/login")).permitAll()
-									.requestMatchers(new AntPathRequestMatcher("/api/**")).hasAnyRole("Admin", "User")
-									.requestMatchers(new AntPathRequestMatcher("/problem/**")).hasAnyRole("Admin", "User")
-									.requestMatchers(new AntPathRequestMatcher("/user/**")).hasRole("Admin")
-									.anyRequest().authenticated()
-									.and().httpBasic();
+						.requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll()//.hasAnyRole("Admin", "User")
+						.anyRequest().authenticated()
+						.and().addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 		
 		return http.build();
 	}
@@ -46,10 +56,9 @@ public class SecurityConfig{
 	public CorsFilter corsFilter() {
 		CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Allow frontend
+        config.setAllowedOrigins(Arrays.asList("http://localhost:5173","http://localhost:3000")); // Allow frontend
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
@@ -66,10 +75,12 @@ public class SecurityConfig{
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService) {
+    public AuthenticationManager authenticationManager() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setUserDetailsService(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder());
         return new ProviderManager(Arrays.asList(authProvider));
     }
+    
+    
 }

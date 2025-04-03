@@ -5,6 +5,11 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,7 +19,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.model.AuthRequest;
+import com.model.AuthResponse;
 import com.model.User;
+import com.security.JwtUtil;
 import com.service.UserService;
 
 import io.swagger.annotations.Api;
@@ -23,6 +31,11 @@ import io.swagger.annotations.Api;
 @RequestMapping("/user")
 @Api(tags = "User Management", description = "Operations related to Users")
 public class UserController {
+	
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	@Autowired
+    private JwtUtil jwtUtil;
 	
 	@Autowired
     private UserService userService;
@@ -45,16 +58,29 @@ public class UserController {
     }
 	
 	@PostMapping("/login")
-	public String login(@RequestBody Map<String, String> request){
-		String userName = request.get("username");
-		String password = request.get("password");
-		
-		if(userName == null || password == null) {
-			return "Invalid input";
-		}
-		
-		boolean authenticated = userService.authenticateUser(userName, password);
-        return authenticated ? "Login successful" : "Invalid username or password";
+	public ResponseEntity<?> login(@RequestBody AuthRequest authRequest){
+		try {
+            // Authenticate the user using the AuthenticationManager
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
+            );
+
+            // Set authentication in SecurityContext (important if you are using Spring Security)
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Generate the JWT token
+            String token = jwtUtil.generateToken(authRequest.getUsername());
+
+            // Return the token as the response
+            return ResponseEntity.ok(new AuthResponse(token));  // Return a custom response object, if desired
+
+        } catch (BadCredentialsException e) {
+            // If credentials are invalid, return an error message
+            return ResponseEntity.status(401).body("Invalid username or password.");
+        } catch (Exception e) {
+            // General exception handling
+            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        }
 	}
 	
 	@GetMapping("/getAll")
