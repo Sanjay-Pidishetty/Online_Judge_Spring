@@ -1,6 +1,7 @@
 package com.security;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
 
 @Component
 public class JwtUtil {
@@ -21,8 +23,9 @@ public class JwtUtil {
     private long validityInMilliseconds = 3600000; // 1 hour
 
     // Generate a JWT token
-    public String generateToken(String username) {
+    public String generateToken(String username,List<String> roles) {
         Claims claims = Jwts.claims().setSubject(username);
+        claims.put("roles", roles);
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
 
@@ -51,9 +54,13 @@ public class JwtUtil {
 
     // Parse JWT and extract claims
     private Claims parseClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody();
+    	try {
+            return Jwts.parser()
+                       .setSigningKey(secretKey) // Same secret key used for signing
+                       .parseClaimsJws(token)
+                       .getBody();
+        } catch (SignatureException e) {
+            throw new RuntimeException("Invalid JWT signature");
+        }
     }
 }

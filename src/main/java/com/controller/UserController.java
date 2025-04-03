@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.config.CustomUserDetails;
 import com.model.AuthRequest;
 import com.model.AuthResponse;
 import com.model.User;
@@ -67,9 +68,10 @@ public class UserController {
 
             // Set authentication in SecurityContext (important if you are using Spring Security)
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            List<String> roles = ((CustomUserDetails) authentication.getPrincipal()).getRoles();
 
             // Generate the JWT token
-            String token = jwtUtil.generateToken(authRequest.getUsername());
+            String token = jwtUtil.generateToken(authRequest.getUsername(), roles);
 
             // Return the token as the response
             return ResponseEntity.ok(new AuthResponse(token));  // Return a custom response object, if desired
