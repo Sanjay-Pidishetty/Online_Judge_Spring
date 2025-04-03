@@ -10,8 +10,11 @@ import com.model.User;
 import com.service.CodeExecutionService;
 import com.service.UserService;
 
+import io.swagger.annotations.Api;
+
 @RestController
 @RequestMapping("/api")
+@Api(tags = "Code Management", description = "Operations related to code execution")
 public class CodeController {
 
     @Autowired
