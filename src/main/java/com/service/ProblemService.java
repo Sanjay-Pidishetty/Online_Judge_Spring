@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.model.Problem;
@@ -17,8 +16,13 @@ public class ProblemService {
 	ProblemRepository problemRepository;
 	
 	public boolean addProblem(Problem problem){
-		problemRepository.save(problem);
-		return true;
+		try {
+			problemRepository.save(problem);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	public List<Problem> getAllProblems(){

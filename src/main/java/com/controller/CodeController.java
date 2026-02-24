@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.model.User;
 import com.service.CodeExecutionService;
-import com.service.UserService;
 
 import io.swagger.annotations.Api;
 
@@ -26,9 +24,10 @@ public class CodeController {
             // Extract the parameters from the map
             String language = (String) requestBody.get("language");
             String code = (String) requestBody.get("code");
+            String input = (String) requestBody.get("input");
 
             // Execute the code using the service
-            String result = codeExecutionService.executeCode(language, code);
+            String result = codeExecutionService.executeCode(language, code, input);
 
             // Return the result of code execution
             return ResponseEntity.ok(result);
