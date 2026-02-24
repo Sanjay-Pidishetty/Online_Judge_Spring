@@ -9,20 +9,20 @@ public class CodeExecutionService {
 	
 	private final String targetDir = "code_output"; 
 
-    public String executeCode(String language, String code) throws Exception {
+    public String executeCode(String language, String code, String input) throws Exception {
     	Path directoryPath = Paths.get(targetDir);
         if (!Files.exists(directoryPath)) {
             Files.createDirectories(directoryPath);  // Create the directory if it doesn't exist
         }
         if (language.equalsIgnoreCase("java")) {
-            return executeJavaCode(code);
+            return executeJavaCode(code, input);
         } else if (language.equalsIgnoreCase("cpp")) {
             return executeCppCode(code);
         }
         throw new IllegalArgumentException("Unsupported language: " + language);
     }
 
-    private String executeJavaCode(String code) throws IOException {
+    private String executeJavaCode(String code, String input) throws IOException {
         File file = new File(targetDir +"/Solution.java");
         BufferedWriter writer = new BufferedWriter(new FileWriter(file));
         writer.write(code);
@@ -42,6 +42,15 @@ public class CodeExecutionService {
 
         // Execute Java code
         Process executeProcess = new ProcessBuilder("java", "-cp", targetDir, "Solution").start();
+        
+        // Provide input to the process
+        if (input != null && !input.isEmpty()) {
+            try (BufferedWriter processWriter = new BufferedWriter(new OutputStreamWriter(executeProcess.getOutputStream()))) {
+                processWriter.write(input);
+                processWriter.flush();
+            }
+        }
+        
         return getOutput(executeProcess);
     }
 

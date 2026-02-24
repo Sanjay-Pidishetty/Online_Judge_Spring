@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,36 +21,29 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import com.security.JwtAuthenticationFilter;
-import com.security.JwtUtil;
 
 @Configuration
 public class SecurityConfig{
 	
-	private UserDetailsService userDetailsService;
-	
 	@Autowired
 	private JwtAuthenticationFilter jwtAuthenticationFilter;
 	
-	@Autowired
-    private JwtUtil jwtUtil;
-	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-		.cors().and()
-		.csrf(csrf -> csrf.disable())
-		.sessionManagement(session -> session
-	            .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Disable session persistence
-	        )
-				.authorizeHttpRequests()
-						.requestMatchers(new AntPathRequestMatcher("/user/register")).permitAll()
-						.requestMatchers(new AntPathRequestMatcher("/swagger-ui.*")).permitAll()
-						.requestMatchers(new AntPathRequestMatcher("/user/login")).permitAll()
-						//.requestMatchers(new AntPathRequestMatcher("/api/**"))/*.permitAll()*/.hasAnyRole("Admin", "User")
-						//.requestMatchers(new AntPathRequestMatcher("/problem/**")).hasAnyRole("Admin", "User")
-						//.requestMatchers(new AntPathRequestMatcher("/user/**")).hasRole("Admin")
-						.anyRequest().authenticated()
-						.and().addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http
+                .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Disable session persistence
+                )
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers(new AntPathRequestMatcher("/user/register")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/swagger-ui.*")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/user/login")).permitAll()
+                        //.requestMatchers(new AntPathRequestMatcher("/api/**"))/*.permitAll()*/.hasAnyRole("Admin", "User")
+                        //.requestMatchers(new AntPathRequestMatcher("/problem/**")).hasAnyRole("Admin", "User")
+                        //.requestMatchers(new AntPathRequestMatcher("/user/**")).hasRole("Admin")
+                        .anyRequest().authenticated()).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 		
 		return http.build();
 	}
