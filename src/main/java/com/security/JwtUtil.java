@@ -7,9 +7,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 
 @Component
 public class JwtUtil {
@@ -47,7 +50,7 @@ public class JwtUtil {
         try {
             parseClaims(token);
             return true;
-        } catch (Exception e) {
+        } catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException e) {
             return false;
         }
     }
@@ -56,11 +59,19 @@ public class JwtUtil {
     private Claims parseClaims(String token) {
     	try {
             return Jwts.parser()
-                       .setSigningKey(secretKey) // Same secret key used for signing
+                       .setSigningKey(secretKey)
                        .parseClaimsJws(token)
                        .getBody();
         } catch (SignatureException e) {
-            throw new RuntimeException("Invalid JWT signature");
+            throw new RuntimeException("Invalid JWT signature", e);
+        } catch (MalformedJwtException e) {
+            throw new RuntimeException("Invalid JWT token", e);
+        } catch (ExpiredJwtException e) {
+            throw new RuntimeException("JWT token expired", e);
+        } catch (UnsupportedJwtException e) {
+            throw new RuntimeException("Unsupported JWT token", e);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("JWT claims string is empty", e);
         }
     }
 }

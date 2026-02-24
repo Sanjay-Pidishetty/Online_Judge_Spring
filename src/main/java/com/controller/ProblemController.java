@@ -29,7 +29,6 @@ public class ProblemController {
 	@PostMapping("/add")
 	public ResponseEntity<String> createProblem(@RequestBody Problem problem) {
 		try {
-            // Assume the UserService handles the registration logic
             boolean isAdded = problemService.addProblem(problem);
 
             if (isAdded) {
@@ -37,9 +36,10 @@ public class ProblemController {
             } else {
                 return ResponseEntity.status(400).body("Adding new problem failed. Please try again.");
             }
-        } catch (Exception e) {
-            // Handle any errors that occur during registration
-            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body("Failed to add problem");
         }
 	}
 	

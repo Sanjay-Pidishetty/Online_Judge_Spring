@@ -34,3 +34,6 @@ build/
 
 code_output
 .metadata
+
+# Environment variables
+.env

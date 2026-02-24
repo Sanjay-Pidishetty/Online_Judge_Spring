@@ -3,7 +3,10 @@ package com.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +15,8 @@ import com.repository.ProblemRepository;
 
 @Service
 public class ProblemService {
+	private static final Logger logger = LoggerFactory.getLogger(ProblemService.class);
+	
 	@Autowired
 	ProblemRepository problemRepository;
 	
@@ -19,8 +24,11 @@ public class ProblemService {
 		try {
 			problemRepository.save(problem);
 			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			logger.error("Invalid problem data: {}", e.getMessage());
+			return false;
+		} catch (DataAccessException e) {
+			logger.error("Database error while adding problem: {}", e.getMessage());
 			return false;
 		}
 	}

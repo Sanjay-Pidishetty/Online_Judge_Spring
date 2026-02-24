@@ -43,7 +43,6 @@ public class UserController {
 	@PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
         try {
-            // Assume the UserService handles the registration logic
             boolean isRegistered = userService.registerUser(user);
 
             if (isRegistered) {
@@ -51,36 +50,31 @@ public class UserController {
             } else {
                 return ResponseEntity.status(400).body("Registration failed. Please try again.");
             }
-        } catch (Exception e) {
-            // Handle any errors that occur during registration
-            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body("Registration failed");
         }
     }
 	
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody AuthRequest authRequest){
 		try {
-            // Authenticate the user using the AuthenticationManager
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
             );
 
-            // Set authentication in SecurityContext (important if you are using Spring Security)
             SecurityContextHolder.getContext().setAuthentication(authentication);
             List<String> roles = ((CustomUserDetails) authentication.getPrincipal()).getRoles();
 
-            // Generate the JWT token
             String token = jwtUtil.generateToken(authRequest.getUsername(), roles);
 
-            // Return the token as the response
-            return ResponseEntity.ok(new AuthResponse(token));  // Return a custom response object, if desired
+            return ResponseEntity.ok(new AuthResponse(token));
 
         } catch (BadCredentialsException e) {
-            // If credentials are invalid, return an error message
             return ResponseEntity.status(401).body("Invalid username or password.");
-        } catch (Exception e) {
-            // General exception handling
-            return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body("Login failed");
         }
 	}
 	
